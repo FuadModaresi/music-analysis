@@ -1,3 +1,8 @@
+
+// .eslintrc.json
 {
-  "extends": ["next/core-web-vitals", "next/typescript"]
+  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended", "next/typescript"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "warn"
+  }
 }

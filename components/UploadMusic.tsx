@@ -10,7 +10,7 @@ export default function UploadMusic() {
   const [loading, setLoading] = useState(false);
   
   // Default example result for demo purposes
-  const exampleResult = "🎶 Sample Notes: C - E - G - A - D (This example shows detected notes or transcription text based on the uploaded file).";
+  const exampleResult = "🎶 ";
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target.files?.[0] ?? null);
@@ -25,14 +25,16 @@ export default function UploadMusic() {
     formData.append('musicFile', file);
 
     try {
-      const { data } = await axios.post('/api/analyze', formData);
+      const { data } = await axios.post('/api/analyze-audio', formData);
+      console.log("API Response:", data);
       setAnalysisResult(data.transcription); // Adjust this based on actual response format
     } catch (error) {
       console.error("Error analyzing audio:", error);
     } finally {
-      setLoading(false);
+      setLoading(false);      
     }
   };
+  
 
   return (
     <div className="p-8 bg-darkBg text-white rounded-lg shadow-lg animate-fade-in">
@@ -41,10 +43,10 @@ export default function UploadMusic() {
         Upload an audio file to get the musical notes or transcription. Here’s a sample output to demonstrate the app’s functionality.
       </p>
       <div className="bg-gray-800 p-4 rounded text-center mb-6 text-gray-300">
-        {analysisResult || exampleResult}
+        {analysisResult || exampleResult} 
       </div>
       <form onSubmit={handleSubmit} className="flex flex-col items-center">
-        <input
+        <input 
           type="file"
           onChange={handleFileChange}
           accept="audio/*"

@@ -7,3 +7,8 @@ body {
   color: #ffffff;
   font-family: sans-serif;
 }
+
+canvas {
+  border: 1px solid #333;
+  background-color: #f9f9f9;
+}

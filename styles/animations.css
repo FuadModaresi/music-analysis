@@ -1,0 +1,31 @@
+@keyframes pulse-border {
+  0% {
+    border-color: rgba(96, 165, 250, 0.2);
+  }
+  50% {
+    border-color: rgba(96, 165, 250, 0.8);
+  }
+  100% {
+    border-color: rgba(96, 165, 250, 0.2);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-border {
+  animation: pulse-border 2s infinite;
+}

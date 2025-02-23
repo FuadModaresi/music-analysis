@@ -1,10 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import * as musicMetadata from 'music-metadata';
 
-// Define allowed methods
-export async function POST(req: Request) {
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+export async function POST(request: NextRequest) {
+  if (request.method !== 'POST') {
+    return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
+  }
+
   try {
-    const formData = await req.formData();
+    const formData = await request.formData();
     const file = formData.get('musicFile') as File;
 
     if (!file) {
@@ -64,28 +73,41 @@ export async function POST(req: Request) {
       }
     };
 
-    return NextResponse.json(analysis);
+    return new NextResponse(JSON.stringify(analysis), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    });
 
   } catch (error) {
     console.error('Error processing audio:', error);
-    return NextResponse.json(
-      { 
+    return new NextResponse(
+      JSON.stringify({ 
         error: 'Failed to process audio file. Please try again.',
         details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
+      }),
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      }
     );
   }
 }
 
-// Add OPTIONS method to handle preflight requests
-export async function OPTIONS(request: Request) {
-  return NextResponse.json({}, { 
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
     status: 200,
     headers: {
+      'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Allow-Origin': '*'
-    }
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    },
   });
 }

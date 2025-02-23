@@ -98,9 +98,10 @@ export default function UploadMusic() {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
       });
       
-      // Log response for debugging
       console.log('Analysis response:', response.data);
       
       setAnalysisResult({ 

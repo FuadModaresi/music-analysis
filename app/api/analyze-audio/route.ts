@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import * as musicMetadata from 'music-metadata';
 
-export async function POST(request: Request) {
+// Define allowed methods
+export async function POST(req: Request) {
   try {
-    const formData = await request.formData();
+    const formData = await req.formData();
     const file = formData.get('musicFile') as File;
 
     if (!file) {
@@ -43,20 +44,11 @@ export async function POST(request: Request) {
       `Sample Rate: ${metadata.format.sampleRate} Hz`,
       `Channels: ${metadata.format.numberOfChannels}`
     ]
-    .filter(Boolean) // Remove null entries
+    .filter(Boolean)
     .join('\n');
 
-    // Basic note extraction (mocked for now)
-    const notes = [
-      { pitch: 'C4', duration: 'quarter' },
-      { pitch: 'E4', duration: 'half' },
-      { pitch: 'G4', duration: 'quarter' }
-    ];
-
-    // Extract basic audio information
     const analysis = {
       transcription,
-      notes,
       duration: metadata.format.duration,
       sampleRate: metadata.format.sampleRate,
       numberOfChannels: metadata.format.numberOfChannels,
@@ -84,4 +76,16 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+// Add OPTIONS method to handle preflight requests
+export async function OPTIONS(request: Request) {
+  return NextResponse.json({}, { 
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Origin': '*'
+    }
+  });
 }

@@ -89,12 +89,16 @@ export default function UploadMusic() {
 
     setLoading(true);
     setError(null);
-    const formData = new FormData();
-    formData.append('musicFile', file);
-
     try {
       const waveform = await analyzeWaveform(file);
-      const response = await axios.post('/api/analyze-audio', formData);
+      const formData = new FormData();
+      formData.append('musicFile', file);
+
+      const response = await axios.post('/api/analyze-audio', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       
       // Log response for debugging
       console.log('Analysis response:', response.data);

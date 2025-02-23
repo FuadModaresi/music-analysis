@@ -103,11 +103,11 @@ export default function UploadMusic() {
         ...response.data, 
         waveform 
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error analyzing audio:", error);
-      const errorMessage = error.response?.data?.details || 
-                         error.response?.data?.error || 
-                         error.message ||
+      const errorMessage = (error as { response?: { data?: { details?: string; error?: string } }; message?: string }).response?.data?.details || 
+                         (error as { response?: { data?: { details?: string; error?: string } }; message?: string }).response?.data?.error || 
+                         (error as { response?: { data?: { details?: string; error?: string } }; message?: string }).message ||
                          "Failed to analyze the audio file. Please try again.";
       setError(errorMessage);
       setAnalysisResult(null);

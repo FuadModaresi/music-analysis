@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server';
-import * as mm from '@magenta/music/es6';
 import * as musicMetadata from 'music-metadata';
-
-// We need to polyfill AudioContext for server-side
-import { AudioContext } from 'web-audio-api';
-global.AudioContext = AudioContext;
 
 export async function POST(request: Request) {
   try {
@@ -17,10 +12,6 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-
-    // For debugging
-    console.log('File type:', file.type);
-    console.log('File size:', file.size);
 
     // Convert File to ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();

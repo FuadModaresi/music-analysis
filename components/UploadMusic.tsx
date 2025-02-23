@@ -23,6 +23,7 @@ interface AnalysisResult {
   notes?: {
     pitch: string;
     duration: string;
+    startTime: number;
   }[];
 }
 
@@ -121,27 +122,58 @@ export default function UploadMusic() {
     }
   };
 
-  useEffect(() => {
-    if (analysisResult?.waveform && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+  const drawWaveformAndNotes = useCallback((canvas: HTMLCanvasElement, waveform: number[], notes: any[] = []) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#3B82F6';
-      
-      analysisResult.waveform.forEach((value, index) => {
-        const barWidth = canvas.width / analysisResult.waveform!.length;
-        const barHeight = value * canvas.height;
-        ctx.fillRect(
-          index * barWidth,
-          canvas.height - barHeight,
-          barWidth - 1,
-          barHeight
-        );
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw waveform
+    ctx.beginPath();
+    ctx.strokeStyle = '#4a9eff';
+    ctx.lineWidth = 2;
+
+    const step = Math.ceil(waveform.length / canvas.width);
+    const amp = canvas.height / 2;
+
+    for (let i = 0; i < canvas.width; i++) {
+      const x = i;
+      const y = (1 + waveform[i * step]) * amp;
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    ctx.stroke();
+
+    // Draw notes
+    if (notes && notes.length > 0) {
+      const noteHeight = 20;
+      const startY = canvas.height - 60; // Position for notes
+
+      notes.forEach((note, index) => {
+        const x = (note.startTime / (notes[notes.length - 1].startTime + 1)) * canvas.width;
+        const width = note.duration === 'half' ? 40 : 20;
+
+        // Draw note rectangle
+        ctx.fillStyle = '#2563eb';
+        ctx.fillRect(x, startY - (index * noteHeight), width, noteHeight - 2);
+
+        // Draw note text
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '12px Arial';
+        ctx.fillText(note.pitch, x + 2, startY - (index * noteHeight) + 14);
       });
     }
-  }, [analysisResult]);
+  }, []);
+
+  useEffect(() => {
+    if (canvasRef.current && analysisResult?.waveform && analysisResult?.notes) {
+      drawWaveformAndNotes(canvasRef.current, analysisResult.waveform, analysisResult.notes);
+    }
+  }, [canvasRef, analysisResult, drawWaveformAndNotes]);
 
   const resetAnalysis = () => {
     setFile(null);

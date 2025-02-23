@@ -56,6 +56,27 @@ export async function POST(request: NextRequest) {
     .filter(Boolean)
     .join('\n');
 
+    // Simulate dynamic note extraction
+    const simulateNoteExtraction = (duration: number): { pitch: string, duration: string, startTime: number }[] => {
+      const pitches = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'];
+      const noteDurations = ['quarter', 'half', 'whole'];
+      const notes = [];
+      let currentTime = 0;
+
+      while (currentTime < duration) {
+        const pitch = pitches[Math.floor(Math.random() * pitches.length)];
+        const noteDuration = noteDurations[Math.floor(Math.random() * noteDurations.length)];
+        const noteDurationTime = noteDuration === 'whole' ? 4 : noteDuration === 'half' ? 2 : 1;
+
+        notes.push({ pitch, duration: noteDuration, startTime: currentTime });
+        currentTime += noteDurationTime * 0.5; // Simulate time progression
+      }
+
+      return notes;
+    };
+
+    const notes = simulateNoteExtraction(metadata.format.duration || 3);
+
     const analysis = {
       transcription,
       duration: metadata.format.duration,
@@ -64,6 +85,7 @@ export async function POST(request: NextRequest) {
       bitrate: metadata.format.bitrate,
       format: metadata.format.container,
       confidence: 0.8,
+      notes,
       metadata: {
         title: metadata.common.title,
         artist: metadata.common.artist,

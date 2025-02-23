@@ -8,7 +8,22 @@ interface AnalysisResult {
   transcription: string;
   confidence?: number;
   duration?: number;
+  sampleRate?: number;
+  numberOfChannels?: number;
+  bitrate?: number;
+  format?: string;
   waveform?: number[];
+  metadata?: {
+    title?: string;
+    artist?: string;
+    album?: string;
+    year?: number;
+    genre?: string[];
+  };
+  notes?: {
+    pitch: string;
+    duration: string;
+  }[];
 }
 
 export default function UploadMusic() {
@@ -80,13 +95,21 @@ export default function UploadMusic() {
     try {
       const waveform = await analyzeWaveform(file);
       const response = await axios.post('/api/analyze-audio', formData);
-      setAnalysisResult({ ...response.data, waveform });
+      
+      // Log response for debugging
+      console.log('Analysis response:', response.data);
+      
+      setAnalysisResult({ 
+        ...response.data, 
+        waveform 
+      });
     } catch (error: any) {
       console.error("Error analyzing audio:", error);
-      setError(
-        error.response?.data?.error || 
-        "Failed to analyze the audio file. Please try again."
-      );
+      const errorMessage = error.response?.data?.details || 
+                         error.response?.data?.error || 
+                         error.message ||
+                         "Failed to analyze the audio file. Please try again.";
+      setError(errorMessage);
       setAnalysisResult(null);
     } finally {
       setLoading(false);
@@ -219,25 +242,25 @@ export default function UploadMusic() {
 
         {analysisResult && (
           <div className="space-y-6">
-            <div className="bg-gray-700/50 rounded-lg p-6">
-              <h3 className="text-xl font-semibold mb-4">Analysis Results</h3>
-              <div className="space-y-4">
-                <div className="text-lg font-mono bg-black/30 p-4 rounded">
-                  {analysisResult.transcription}
+            <div className="analysis-result mt-4 p-4 bg-white rounded-lg shadow-md">
+              <h2 className="text-2xl font-bold mb-2 text-gray-800">Analysis Results</h2>
+              {analysisResult ? (
+                <div>
+                  <pre className="whitespace-pre-wrap text-sm text-gray-700">
+                    {analysisResult.transcription}
+                  </pre>
+                  <h3 className="mt-4 text-xl font-semibold text-gray-800">Notes</h3>
+                  <ul className="list-disc list-inside text-gray-700">
+                    {analysisResult.notes?.map((note, index) => (
+                      <li key={index} className="text-sm">
+                        {note.pitch} ({note.duration} note)
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                {analysisResult.confidence && (
-                  <div className="flex items-center gap-2 text-gray-400">
-                    <span>Confidence:</span>
-                    <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-accent"
-                        style={{ width: `${analysisResult.confidence * 100}%` }}
-                      />
-                    </div>
-                    <span>{Math.round(analysisResult.confidence * 100)}%</span>
-                  </div>
-                )}
-              </div>
+              ) : (
+                <p className="text-gray-500">No analysis results available.</p>
+              )}
             </div>
             
             <button
